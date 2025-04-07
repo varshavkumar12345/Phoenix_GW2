@@ -1,3 +1,4 @@
-streamlit
-requests
+flask
+flask-cors
 goose3
+requests
