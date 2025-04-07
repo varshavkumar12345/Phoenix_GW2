@@ -1,7 +1,10 @@
 # Phoenix_GW2
 Repo for imact ai 2.0 2025
 
-#What the code does
+
+
+
+# What the code does
 
 1. User has to input a statement
 
