@@ -18,7 +18,8 @@
 
       const baseURL = window.location.hostname === "localhost"
         ? "http://localhost:5000"
-        : "https://your-backend-service-name.onrender.com"; // Replace with your actual Render backend URL
+        : "https://phoenix-gw2.onrender.com"; // Use your real Render service URL
+
 
       try {
         const response = await fetch(`${baseURL}/api/check`, {
