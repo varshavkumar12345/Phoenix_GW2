@@ -4,7 +4,7 @@ Repo for imact ai 2.0 2025
 
 
 
-# What the code does
+# What the code (try.ipynb) does
 
 1. User has to provide link/url of the article they have to fact check
 
