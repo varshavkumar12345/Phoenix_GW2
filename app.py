@@ -47,7 +47,8 @@ Reason: <brief reason>
         raise Exception(f"API Error: {response.status_code} - {response.text}")
 
     content = response.json()['choices'][0]['message']['content']
-    match = re.search(r"Credibility Score: (\\d+)\\s*Reason: (.*)", content, re.DOTALL)
+    match = re.search(r"Credibility Score: (\d+)\s*Reason: (.*)", content, re.DOTALL)
+
 
     if match:
         score = int(match.group(1))
