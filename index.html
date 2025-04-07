@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Misinformation Detector</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script>
+    async function checkCredibility() {
+      const url = document.getElementById("urlInput").value;
+      const resultDiv = document.getElementById("result");
+      const articleDiv = document.getElementById("article");
+      const errorDiv = document.getElementById("error");
+
+      resultDiv.innerHTML = "";
+      articleDiv.innerHTML = "";
+      errorDiv.innerText = "";
+
+      try {
+        const response = await fetch("http://localhost:5000/api/check", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ url })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Unknown error");
+        }
+
+        articleDiv.innerText = data.article;
+        resultDiv.innerHTML = `<h2 class='text-xl font-semibold'>Credibility Score: ${data.score}/100</h2><p class='text-gray-700 mt-2'>${data.reason}</p>`;
+      } catch (error) {
+        errorDiv.innerText = error.message;
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-50 min-h-screen p-6">
+  <div class="max-w-3xl mx-auto space-y-6">
+    <h1 class="text-3xl font-bold text-center">Misinformation Detector</h1>
+
+    <div class="flex gap-2">
+      <input id="urlInput" class="flex-1 px-4 py-2 border rounded" type="text" placeholder="Enter article URL...">
+      <button onclick="checkCredibility()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Analyze</button>
+    </div>
+
+    <p id="error" class="text-red-500"></p>
+
+    <div id="article" class="bg-white p-4 rounded shadow max-h-64 overflow-y-auto whitespace-pre-wrap"></div>
+
+    <div id="result" class="bg-white p-4 rounded shadow"></div>
+  </div>
+</body>
+</html>
