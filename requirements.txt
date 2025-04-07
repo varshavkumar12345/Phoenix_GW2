@@ -3,3 +3,4 @@ flask-cors
 goose3
 requests
 gunicorn
+os
