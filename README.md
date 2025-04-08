@@ -1,5 +1,7 @@
 # AI for Content Integrity and Misinformation Detection 
 
+https://drive.google.com/drive/folders/14eh9BpONfunWjTqnveMZnUc0L7wApAg1?usp=sharing
+
 
 The website can be used by https://varshavkumar12345.github.io/Phoenix_GW2/
 
