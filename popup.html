@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Misinformation Detector</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      width: 350px;
+      padding: 1rem;
+    }
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div class="space-y-4">
+    <h1 class="text-xl font-bold text-center">Misinformation Detector</h1>
+    
+    <div id="analyzeButton" class="flex justify-center">
+      <button id="checkCurrentPage" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        Analyze Current Page
+      </button>
+    </div>
+    
+    <div id="loading" class="hidden">
+      <div class="loader"></div>
+      <p class="text-center mt-2">Analyzing content...</p>
+    </div>
+    
+    <div id="result" class="hidden bg-white p-4 rounded shadow">
+      <h2 class="text-lg font-semibold">Credibility Score: <span id="score"></span>/100</h2>
+      <p class="text-gray-700 mt-2" id="reason"></p>
+    </div>
+    
+    <div id="error" class="hidden text-red-500 text-center"></div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
