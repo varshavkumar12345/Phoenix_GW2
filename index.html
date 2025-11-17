@@ -1,63 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Misinformation Detector</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script>
-    async function checkCredibility() {
-      const url = document.getElementById("urlInput").value;
-      const resultDiv = document.getElementById("result");
-      const articleDiv = document.getElementById("article");
-      const errorDiv = document.getElementById("error");
-
-      resultDiv.innerHTML = "";
-      articleDiv.innerHTML = "";
-      errorDiv.innerText = "";
-
-      const baseURL = window.location.hostname === "localhost"
-        ? "http://localhost:5000"
-        : "https://phoenix-gw2.onrender.com"; // Use your real Render service URL
-
-
-      try {
-        const response = await fetch(`${baseURL}/api/check`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ url })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || "Unknown error");
-        }
-
-        articleDiv.innerText = data.article;
-        resultDiv.innerHTML = `<h2 class='text-xl font-semibold'>Credibility Score: ${data.score}/100</h2><p class='text-gray-700 mt-2'>${data.reason}</p>`;
-      } catch (error) {
-        errorDiv.innerText = error.message;
-      }
-    }
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credibility Checker</title>
+    <style>
+        :root { font-family: "Inter", "Segoe UI", system-ui, sans-serif; color: #0f172a; background-color: #0f172a; }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; background: radial-gradient(circle at top, #1d4ed8, #0f172a 55%); padding: clamp(1rem, 2vw, 2.5rem); color: inherit; }
+        .app-shell { max-width: 1100px; margin: 0 auto; display: grid; gap: 1.5rem; }
+        header { color: #e2e8f0; }
+        header h1 { margin: 0; font-size: clamp(2rem, 4vw, 3.2rem); }
+        header p { margin: 0.35rem 0 0; color: #cbd5f5; max-width: 60ch; }
+        main { background: #ffffff; border-radius: 24px; padding: clamp(1.5rem, 2vw, 2.5rem); box-shadow: 0 25px 80px rgba(15, 23, 42, 0.25); display: grid; gap: 2rem; }
+        form { display: grid; gap: 1rem; }
+        .field-group { display: grid; gap: 0.4rem; }
+        label { font-weight: 600; color: #0f172a; }
+        input[type="text"], input[type="number"] { border: 1px solid #e2e8f0; border-radius: 14px; padding: 0.95rem 1.2rem; font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s; }
+        input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
+        .controls { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; }
+        .controls .field-group { flex: 1 1 220px; }
+        .controls button { padding: 1rem 1.8rem; border: none; border-radius: 14px; font-weight: 600; font-size: 1rem; cursor: pointer; background: linear-gradient(90deg, #2563eb, #7c3aed); color: white; transition: transform 0.2s, opacity 0.2s; }
+        .controls button:hover:not(:disabled) { transform: translateY(-1px); }
+        .controls button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .status { min-height: 1.5rem; font-style: italic; color: #475569; }
+        .answer-card, .references-card { border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; background: #f8fafc; }
+        .answer-card h2, .references-card h2 { margin: 0 0 0.75rem; font-size: 1.25rem; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; }
+        .answer-text { white-space: pre-wrap; line-height: 1.6; color: #1e293b; }
+        .docs-list { margin: 0; padding-left: 1.25rem; display: grid; gap: 0.5rem; }
+        .docs-list a { color: #2563eb; text-decoration: none; word-break: break-all; }
+        .docs-list a:hover { text-decoration: underline; }
+        .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+        .chip { border: 1px solid transparent; border-radius: 999px; padding: 0.45rem 0.9rem; font-size: 0.9rem; cursor: pointer; background: rgba(37, 99, 235, 0.08); color: #1d4ed8; transition: background 0.2s, border 0.2s; }
+        .chip:hover { background: rgba(37, 99, 235, 0.15); border-color: rgba(37, 99, 235, 0.3); }
+        .loader { width: 20px; height: 20px; border: 3px solid #bfd0ff; border-top-color: #2563eb; border-radius: 50%; animation: spin 1s linear infinite; display: none; }
+        .status-row { display: flex; align-items: center; gap: 0.6rem; }
+        .status-row.active .loader { display: inline-block; }
+        .history { display: grid; gap: 1rem; margin-top: 0.5rem; }
+        .history-item { background: #eef2ff; border-radius: 12px; padding: 0.9rem 1.2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+        .history-item button { border: none; background: transparent; color: #2563eb; cursor: pointer; font-weight: 600; }
+        @media (max-width: 640px) { .controls { flex-direction: column; align-items: stretch; } .history-item { flex-direction: column; align-items: flex-start; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen p-6">
-  <div class="max-w-3xl mx-auto space-y-6">
-    <h1 class="text-3xl font-bold text-center">Misinformation Detector</h1>
+<body>
+    <div class="app-shell">
+        <header>
+            <h1>Credibility Checker</h1>
+            <p>Paste an article URL to extract the content and receive a credibility score powered by the Mistral API, similar to <a style="color:#93c5fd;" href="https://github.com/varshavkumar12345/Phoenix_GW2" target="_blank" rel="noopener">Phoenix_GW2</a>.</p>
+        </header>
 
-    <div class="flex gap-2">
-      <input id="urlInput" class="flex-1 px-4 py-2 border rounded" type="text" placeholder="Enter article URL...">
-      <button onclick="checkCredibility()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Analyze</button>
+        <main>
+            <form id="query-form">
+                <div class="field-group">
+                    <label for="url-input">Article URL</label>
+                    <input id="url-input" name="url" type="url" placeholder="https://example.com/article" required />
+                    <div class="chips" id="suggestions">
+                        <button type="button" class="chip">https://news.google.com/rss/articles/CBMi...</button>
+                        <button type="button" class="chip">https://www.bbc.com/news/technology-...</button>
+                        <button type="button" class="chip">https://www.reuters.com/technology/...</button>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button id="submit-btn" type="submit">Check Credibility</button>
+                </div>
+
+                <div class="status-row" id="status-row">
+                    <div class="loader"></div>
+                    <p class="status" id="status">Ready.</p>
+                </div>
+            </form>
+
+            <section class="answer-card">
+                <h2>Credibility Score</h2>
+                <div class="answer-text" id="score">No score yet.</div>
+            </section>
+
+            <section class="references-card">
+                <h2>Reason</h2>
+                <div class="answer-text" id="reason">No analysis yet.</div>
+            </section>
+
+            <section>
+                <h2 style="margin-bottom:0.5rem;">Article preview</h2>
+                <div class="answer-card" style="padding:1rem;">
+                    <div class="answer-text" id="article">No article extracted.</div>
+                </div>
+            </section>
+
+            <section>
+                <h2 style="margin-bottom:0.5rem;">Recent checks</h2>
+                <div class="history" id="history"></div>
+            </section>
+        </main>
     </div>
 
-    <p id="error" class="text-red-500"></p>
+    <script>
+        const form = document.getElementById("query-form");
+        const urlInput = document.getElementById("url-input");
+        const scoreBox = document.getElementById("score");
+        const reasonBox = document.getElementById("reason");
+        const articleBox = document.getElementById("article");
+        const statusEl = document.getElementById("status");
+        const statusRow = document.getElementById("status-row");
+        const submitBtn = document.getElementById("submit-btn");
+        const suggestions = document.getElementById("suggestions");
+        const historyEl = document.getElementById("history");
+        const recentQueries = [];
 
-    <div id="article" class="bg-white p-4 rounded shadow max-h-64 overflow-y-auto whitespace-pre-wrap"></div>
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const url = urlInput.value.trim();
 
-    <div id="result" class="bg-white p-4 rounded shadow"></div>
-  </div>
+            if (!url) {
+                statusEl.textContent = "Please enter a URL.";
+                return;
+            }
+
+            submitBtn.disabled = true;
+            statusEl.textContent = "Extracting article and checking credibility...";
+            statusRow.classList.add("active");
+            scoreBox.textContent = "";
+            reasonBox.textContent = "";
+            articleBox.textContent = "";
+
+            try {
+                const response = await fetch("/api/check", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url }),
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.message || "Unable to complete request.");
+                }
+
+                const data = await response.json();
+                scoreBox.textContent = typeof data.score === "number" ? `${data.score}/100` : "Score unavailable.";
+                reasonBox.textContent = data.reason || "No reason returned.";
+                articleBox.textContent = data.article || "Article extraction failed.";
+
+                statusEl.textContent = "Analysis complete.";
+                statusRow.classList.remove("active");
+                updateHistory(url);
+            } catch (error) {
+                statusEl.textContent = error.message;
+                scoreBox.textContent = "An error occurred.";
+                statusRow.classList.remove("active");
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
+        form.addEventListener("submit", handleSubmit);
+
+        suggestions.addEventListener("click", (event) => {
+            if (event.target.classList.contains("chip")) {
+                urlInput.value = event.target.textContent;
+                urlInput.focus();
+            }
+        });
+
+        function updateHistory(url) {
+            recentQueries.unshift(url);
+            if (recentQueries.length > 5) recentQueries.pop();
+
+            historyEl.innerHTML = recentQueries
+                .map(
+                    (item) =>
+                        `<div class="history-item"><span>${item}</span><button data-query="${item}">Check again</button></div>`
+                )
+                .join("");
+        }
+
+        historyEl.addEventListener("click", (event) => {
+            if (event.target.dataset.query) {
+                urlInput.value = event.target.dataset.query;
+                urlInput.focus();
+            }
+        });
+    </script>
 </body>
 </html>
+

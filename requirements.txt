@@ -1,5 +1,6 @@
+chromadb
 flask
-flask-cors
 goose3
-requests
-gunicorn
+ollama
+scrapy
+
