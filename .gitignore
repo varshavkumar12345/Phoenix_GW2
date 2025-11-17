@@ -1,0 +1,19 @@
+# Python cache/virtualenv
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local vector DB and datasets
+chroma_db/
+googlenews.json
+
+# Scrapy output/logs
+*.log
+
+# Secrets
+.env
+
+# Frontend build artifacts (if any)
+node_modules/
+dist/
