@@ -1,6 +1,6 @@
 # RAG4 Credibility Checker
 
-This project turns a local Flask app into a misinformation/credibility checker inspired by the [Phoenix_GW2](https://github.com/varshavkumar12345/Phoenix_GW2) repository. Supply a news/article URL and the app will:
+This project turns a local Flask app into a misinformation/credibility checker. Supply a news/article URL and the app will:
 
 1. Fetch and clean the article text with Goose.
 2. Score the article’s credibility using a local Ollama `llama3` model and a structured prompt.
