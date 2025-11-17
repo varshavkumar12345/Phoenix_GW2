@@ -1,4 +1,4 @@
-# RAG Enabled Credibility Checker
+#     RAG Enabled Credibility Checker
 
 This project uses RAG and LLMs to calculate the credibility score of any website. Supply a news/article URL and the app will:
 
@@ -6,7 +6,7 @@ This project uses RAG and LLMs to calculate the credibility score of any website
 2. Score the article’s credibility using a local Ollama `llama3` model and a structured prompt.
 3. Return the score, reasoning, and an excerpt of the extracted article to the browser UI at `/`.
 
-The repository also contains a Scrapy crawler and ChromaDB embedding script (legacy RAG flow), but the current app path centers on the credibility endpoint.
+The repository also contains a Scrapy crawler and ChromaDB embedding script (legacy RAG flow).
 
 ## Requirements
 
