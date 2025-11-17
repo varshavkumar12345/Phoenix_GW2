@@ -47,7 +47,7 @@
     <div class="app-shell">
         <header>
             <h1>Credibility Checker</h1>
-            <p>Paste an article URL to extract the content and receive a credibility score.</p>
+            <p>Paste a news article URL; the app will extract its text, retrieve similar news from your Chroma vector store, and use Mistral and RAG to score credibility.</p>
         </header>
 
         <main>
@@ -57,8 +57,8 @@
                     <input id="url-input" name="url" type="url" placeholder="https://example.com/article" required />
                     <div class="chips" id="suggestions">
                         <button type="button" class="chip">https://news.google.com/rss/articles/CBMi...</button>
-                        <button type="button" class="chip">https://www.bbc.com/news/technology-...</button>
-                        <button type="button" class="chip">https://www.reuters.com/technology/...</button>
+                        <button type="button" class="chip">https://www.bbc.com/news/articles/cx2lzmygr84o</button>
+                        <button type="button" class="chip">https://www.reuters.com/business/google-parent-alphabets-shares-rally-after-berkshire-reveals-49-billion-stake-2025-11-17/</button>
                     </div>
                 </div>
 
@@ -83,9 +83,9 @@
             </section>
 
             <section>
-                <h2 style="margin-bottom:0.5rem;">Article preview</h2>
+                <h2 style="margin-bottom:0.5rem;">Retrieved snippets</h2>
                 <div class="answer-card" style="padding:1rem;">
-                    <div class="answer-text" id="article">No article extracted.</div>
+                    <div class="answer-text" id="snippets">No snippets retrieved yet.</div>
                 </div>
             </section>
 
@@ -101,7 +101,7 @@
         const urlInput = document.getElementById("url-input");
         const scoreBox = document.getElementById("score");
         const reasonBox = document.getElementById("reason");
-        const articleBox = document.getElementById("article");
+        const snippetsBox = document.getElementById("snippets");
         const statusEl = document.getElementById("status");
         const statusRow = document.getElementById("status-row");
         const submitBtn = document.getElementById("submit-btn");
@@ -123,13 +123,13 @@
             statusRow.classList.add("active");
             scoreBox.textContent = "";
             reasonBox.textContent = "";
-            articleBox.textContent = "";
+            snippetsBox.textContent = "";
 
             try {
                 const response = await fetch("/api/check", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ url }),
+                    body: JSON.stringify({ url, top_n: 3 }),
                 });
 
                 if (!response.ok) {
@@ -140,7 +140,7 @@
                 const data = await response.json();
                 scoreBox.textContent = typeof data.score === "number" ? `${data.score}/100` : "Score unavailable.";
                 reasonBox.textContent = data.reason || "No reason returned.";
-                articleBox.textContent = data.article || "Article extraction failed.";
+                snippetsBox.textContent = data.snippets || "No snippets returned.";
 
                 statusEl.textContent = "Analysis complete.";
                 statusRow.classList.remove("active");
@@ -184,5 +184,4 @@
     </script>
 </body>
 </html>
-
 
