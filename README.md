@@ -3,7 +3,7 @@
 This project uses RAG and LLMs to calculate the credibility score of any website. Supply a news/article URL and the app will:
 
 1. Fetch and clean the article text with Goose.
-2. Score the article’s credibility using a local Ollama `llama3` model and a structured prompt.
+2. Score the article’s credibility using a Mistral API key using model `mistral-small-latest` model and a structured prompt.
 3. Return the score, reasoning, and an excerpt of the extracted article to the browser UI at `/`.
 
 The repository also contains a Scrapy crawler and ChromaDB embedding script (legacy RAG flow).
@@ -19,8 +19,6 @@ pip install -r requirements.txt
 Ensure you have:
 
 - Python 3.10+
-- Ollama installed locally with the `llama3` model pulled (e.g., `ollama pull llama3`)
-- (Optional) ChromeDriver/other tooling if you plan to extend scraping
 
 ## Environment
 
