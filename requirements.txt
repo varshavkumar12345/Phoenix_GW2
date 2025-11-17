@@ -3,4 +3,4 @@ flask
 goose3
 ollama
 scrapy
-
+gunicorn
