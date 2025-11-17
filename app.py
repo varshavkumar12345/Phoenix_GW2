@@ -5,7 +5,6 @@ from dataclasses import asdict, dataclass
 from typing import Optional
 
 import chromadb
-import ollama
 import requests
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request, send_from_directory
@@ -13,16 +12,19 @@ from goose3 import Goose
 
 load_dotenv()
 
-EMBEDDING_MODEL = "nomic-embed-text"
+EMBEDDING_MODEL = "mistral-embed"
 COLLECTION_NAME = "news"
 COSINE_THRESHOLD = 0.57
 DEFAULT_MODEL = "mistral-small-latest"
 DEFAULT_API_URL = "https://api.mistral.ai/v1/chat/completions"
+DEFAULT_EMBED_URL = "https://api.mistral.ai/v1/embeddings"
 DEFAULT_TRUNCATION = 1000
 
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 MISTRAL_MODEL = os.getenv("MISTRAL_MODEL", DEFAULT_MODEL)
 MISTRAL_API_URL = os.getenv("MISTRAL_API_URL", DEFAULT_API_URL)
+MISTRAL_EMBED_MODEL = os.getenv("MISTRAL_EMBED_MODEL", EMBEDDING_MODEL)
+MISTRAL_EMBED_URL = os.getenv("MISTRAL_EMBED_URL", DEFAULT_EMBED_URL)
 
 client = chromadb.PersistentClient(path="./chroma_db")
 collection = client.get_or_create_collection(
@@ -80,9 +82,36 @@ def extract_article_from_url(url: str) -> str:
     return article.cleaned_text.strip()
 
 
+def _get_embedding(text: str) -> list[float]:
+    if not MISTRAL_API_KEY:
+        raise RuntimeError(
+            "MISTRAL_API_KEY is not set. Please define it in your environment or .env file."
+        )
+
+    response = requests.post(
+        MISTRAL_EMBED_URL,
+        headers={
+            "Authorization": f"Bearer {MISTRAL_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        json={"model": MISTRAL_EMBED_MODEL, "input": text},
+        timeout=60,
+    )
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"Mistral embedding API error {response.status_code}: {response.text[:200]}"
+        )
+
+    data = response.json()
+    embedding = data.get("data", [{}])[0].get("embedding")
+    if not embedding:
+        raise RuntimeError("Embedding response did not include vector data.")
+    return embedding
+
+
 def retrieve(query: str, top_n: int = 3) -> list[str]:
-    """Embed the query with Ollama and retrieve similar docs from ChromaDB."""
-    qe = ollama.embed(model=EMBEDDING_MODEL, input=query)["embeddings"][0]
+    """Embed the query with Mistral and retrieve similar docs from ChromaDB."""
+    qe = _get_embedding(query)
     results = collection.query(
         query_embeddings=[qe], n_results=top_n, include=["documents", "distances"]
     )
