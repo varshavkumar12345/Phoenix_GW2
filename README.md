@@ -1,6 +1,6 @@
 # Credibility Checker
 
-This project reimagines the Phoenix credibility checker as a Flask application. Drop in a news/article URL and the app will:
+Drop in a news/article URL and the app will:
 
 1. Fetch and clean the article text with Goose.
 2. Embed the article via Ollama, retrieve similar context from your local Chroma store, and send those snippets to the hosted Mistral API for credibility scoring.
