@@ -36,7 +36,7 @@ You’ll need:
 ## Run locally
 
 ```bash
-python retrieve.py
+python app.py
 ```
 
 Open `http://localhost:5000`, paste a URL, and the dashboard will display the credibility score, reason, retrieved snippets, and article preview.
